@@ -95,14 +95,34 @@
     .color-checks { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
 
     .color-check-label {
-      display: flex; align-items: center; gap: 6px;
+      display: flex; align-items: center; gap: 8px;
       padding: 7px 16px; border-radius: 30px;
       cursor: pointer; font-size: 1rem; font-weight: bold;
       color: white; border: 3px solid transparent;
       transition: opacity 0.2s, transform 0.15s;
       user-select: none; -webkit-user-select: none;
     }
-    .color-check-label input[type="checkbox"] { width: 20px; height: 20px; cursor: pointer; accent-color: white; }
+    /* Hide native checkbox — use custom box instead */
+    .color-check-label input[type="checkbox"] {
+      position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none;
+    }
+    /* Custom checkmark box */
+    .color-check-label .custom-cb {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 22px; height: 22px; border-radius: 6px; flex-shrink: 0;
+      background: rgba(255,255,255,0.25);
+      border: 2px solid rgba(255,255,255,0.7);
+      font-size: 14px; line-height: 1;
+      transition: background 0.15s;
+    }
+    .color-check-label input[type="checkbox"]:checked + .custom-cb {
+      background: white;
+      color: #333;
+    }
+    .color-check-label input[type="checkbox"]:checked + .custom-cb::after {
+      content: '✓';
+      font-weight: bold;
+    }
     .color-check-label.unchecked { opacity: 0.38; transform: scale(0.93); }
 
     .label-purple   { background: #7b5ea7; }
@@ -694,7 +714,10 @@ function buildColorFilters() {
       if (currentMode === 'flash') startStudy();
       else                         startQuiz();
     });
+    const customCb = document.createElement('span');
+    customCb.className = 'custom-cb';
     label.appendChild(cb);
+    label.appendChild(customCb);
     label.appendChild(document.createTextNode(` ${c.label} (${c.words.length})`));
     container.appendChild(label);
   });
