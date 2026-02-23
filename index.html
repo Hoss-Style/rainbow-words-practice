@@ -173,13 +173,16 @@
 
     .flashcard {
       border-radius: 32px;
-      padding: 36px 30px 28px;
+      padding: 52px 30px 36px;
       margin-bottom: 22px;
       border: 5px solid transparent;
       cursor: pointer; position: relative;
       transition: transform 0.15s, box-shadow 0.15s;
       box-shadow: 0 8px 30px rgba(0,0,0,0.13);
       user-select: none; -webkit-user-select: none;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      min-height: 220px;
     }
     .flashcard:hover  { transform: scale(1.025); box-shadow: 0 12px 40px rgba(0,0,0,0.18); }
     .flashcard:active { transform: scale(0.975); }
@@ -188,9 +191,10 @@
       font-size: 6rem; font-weight: bold;
       letter-spacing: 6px;
       text-shadow: 4px 4px 0 rgba(0,0,0,0.08);
-      line-height: 1;
+      line-height: 1.1;
+      margin-bottom: 10px;
     }
-    .fc-tap-hint { font-size: 1rem; margin-top: 12px; opacity: 0.55; font-weight: bold; }
+    .fc-tap-hint { font-size: 1rem; margin-top: 10px; opacity: 0.55; font-weight: bold; }
 
     /* sound rings */
     .fc-rings {
@@ -1010,6 +1014,53 @@ function unlockSpeech() {
 document.addEventListener('click', unlockSpeech, { once: true });
 if (speechSynthesis.onvoiceschanged !== undefined) speechSynthesis.onvoiceschanged = () => {};
 
+// Phonetic overrides for words the TTS engine mispronounces
+const PHONETIC_MAP = {
+  'are':     'aar',
+  'of':      'uv',
+  'is':      'izz',
+  'with':    'with',
+  'the':     'thuh',
+  'a':       'ay',
+  'I':       'eye',
+  'was':     'wuz',
+  'said':    'sed',
+  'have':    'hav',
+  'he':      'hee',
+  'she':     'shee',
+  'we':      'wee',
+  'me':      'mee',
+  'be':      'bee',
+  'do':      'doo',
+  'to':      'too',
+  'go':      'goh',
+  'no':      'noh',
+  'so':      'soh',
+  'my':      'my',
+  'by':      'by',
+  'our':     'ow-er',
+  'put':     'puut',
+  'some':    'sum',
+  'come':    'kum',
+  'love':    'luv',
+  'one':     'wun',
+  'two':     'too',
+  'three':   'three',
+  'here':    'heer',
+  'there':   'thair',
+  'what':    'wuht',
+  'when':    'wen',
+  'know':    'noh',
+  'into':    'in-too',
+  'because': 'bee-cuz',
+  'friend':  'frend',
+  'about':   'uh-bout',
+  'little':  'lit-ul',
+  'pretty':  'prit-ee',
+  'funny':   'fun-ee',
+  'happy':   'hap-ee',
+};
+
 function speakWord(word, isQuiz = false) {
   if (!('speechSynthesis' in window) || !word) return;
   speechSynthesis.cancel();
@@ -1017,7 +1068,9 @@ function speakWord(word, isQuiz = false) {
   const card     = document.getElementById('flashcard');
   const speakBtn = document.getElementById('speak-btn');
 
-  const utter = new SpeechSynthesisUtterance(word);
+  // Use phonetic version if available, otherwise use original word
+  const spokenText = PHONETIC_MAP[word] || word;
+  const utter = new SpeechSynthesisUtterance(spokenText);
   utter.rate   = 0.80;
   utter.pitch  = 1.05;
   utter.volume = 1;
