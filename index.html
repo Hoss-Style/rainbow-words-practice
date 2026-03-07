@@ -435,7 +435,8 @@
       .choice-btn { font-size:2rem; padding:18px 12px; }
       .title      { font-size:1.7rem; }
       .feedback-text { font-size:2.5rem; }
-      .color-check-label { font-size:0.88rem; padding:6px 12px; }
+      .color-checks { gap: 8px; }
+      .color-check-label { font-size:0.82rem; padding:6px 10px; flex: 0 0 calc(50% - 8px); justify-content: center; }
       .mode-toggle-btn { font-size:1rem; padding:12px 16px; }
     }
   </style>
@@ -458,9 +459,9 @@
 </div>
 
 <div class="game-card">
-  <div class="title">🌈 Rainbow Words! 🌈</div>
+  <div class="title">🌈 Rainbow Words! <span style="display:inline-block;transform:scaleX(-1)">🌈</span></div>
 
-  <!-- ── Mode toggle ── -->
+  <!-- ── Mode toggle (commented out — flashcards only for now) ──
   <div class="mode-toggle">
     <button class="mode-toggle-btn active-flash" id="btn-mode-flash" onclick="switchMode('flash')">
       📖 Flashcards
@@ -469,6 +470,7 @@
       🎯 Quiz
     </button>
   </div>
+  -->
 
   <!-- Color filter -->
   <div class="color-panel">
@@ -522,10 +524,9 @@
 
   </div>
 
-  <!-- ══ QUIZ MODE ═══════════════════════════════════════════ -->
+  <!-- ══ QUIZ MODE (commented out — flashcards only for now) ═══
   <div id="quiz-area">
 
-    <!-- Inline win banner -->
     <div class="quiz-win" id="quiz-win">
       <div class="quiz-win-emoji">🎉</div>
       <div class="quiz-win-text">You finished!</div>
@@ -560,6 +561,7 @@
     </div>
 
   </div>
+  -->
 
 </div><!-- /game-card -->
 
@@ -684,15 +686,17 @@ function switchMode(mode) {
   currentMode = mode;
   speechSynthesis.cancel();
 
-  // update toggle button styles
-  document.getElementById('btn-mode-flash').className =
-    'mode-toggle-btn ' + (mode === 'flash' ? 'active-flash' : 'inactive');
-  document.getElementById('btn-mode-quiz').className =
-    'mode-toggle-btn ' + (mode === 'quiz' ? 'active-quiz' : 'inactive');
+  // update toggle button styles (elements may not exist if commented out)
+  const btnFlash = document.getElementById('btn-mode-flash');
+  const btnQuiz  = document.getElementById('btn-mode-quiz');
+  if (btnFlash) btnFlash.className = 'mode-toggle-btn ' + (mode === 'flash' ? 'active-flash' : 'inactive');
+  if (btnQuiz)  btnQuiz.className  = 'mode-toggle-btn ' + (mode === 'quiz' ? 'active-quiz' : 'inactive');
 
-  // show/hide sections
-  document.getElementById('flashcard-area').style.display = mode === 'flash' ? 'block' : 'none';
-  document.getElementById('quiz-area').style.display      = mode === 'quiz'  ? 'block' : 'none';
+  // show/hide sections (elements may not exist if commented out)
+  const flashArea = document.getElementById('flashcard-area');
+  const quizArea  = document.getElementById('quiz-area');
+  if (flashArea) flashArea.style.display = mode === 'flash' ? 'block' : 'none';
+  if (quizArea)  quizArea.style.display  = mode === 'quiz'  ? 'block' : 'none';
 
   if (mode === 'flash') startStudy();
   else                  startQuiz();
@@ -857,6 +861,8 @@ function fcPrev() { if (fcIndex > 0) { fcIndex--; loadFlashcard(); } }
 // ══ QUIZ MODE ══
 // ─────────────────────────────────────────────────────────────
 function startQuiz() {
+  // Quiz mode is commented out — bail if elements don't exist
+  if (!document.getElementById('quiz-area')) return;
   speechSynthesis.cancel();
   stars = 0; streak = 0; quizIndex = 0; locked = false;
 
@@ -1005,60 +1011,34 @@ function animateConfetti() {
 // ─────────────────────────────────────────────────────────────
 // SPEECH
 // ─────────────────────────────────────────────────────────────
+// Cache voices once they're loaded (Android loads them async)
+let cachedVoices = [];
+function loadVoices() {
+  cachedVoices = speechSynthesis.getVoices();
+}
+loadVoices();
+if (speechSynthesis.onvoiceschanged !== undefined) {
+  speechSynthesis.onvoiceschanged = loadVoices;
+}
+
+// Unlock speech on first tap — use a real word (empty string fails on Android)
 let speechReady = false;
 function unlockSpeech() {
   if (speechReady) return;
-  const u = new SpeechSynthesisUtterance(''); u.volume = 0;
-  speechSynthesis.speak(u); speechReady = true;
+  const u = new SpeechSynthesisUtterance('.');
+  u.volume = 0.01; // near-silent but not zero (zero is ignored on some devices)
+  u.rate = 2;      // make it fast
+  speechSynthesis.speak(u);
+  speechReady = true;
 }
 document.addEventListener('click', unlockSpeech, { once: true });
-if (speechSynthesis.onvoiceschanged !== undefined) speechSynthesis.onvoiceschanged = () => {};
+document.addEventListener('touchstart', unlockSpeech, { once: true });
 
-// Phonetic overrides for words the TTS engine mispronounces
+// Phonetic overrides only for words TTS genuinely mispronounces in isolation
 const PHONETIC_MAP = {
-  'are':     'aar',
-  'of':      'uv',
-  'is':      'izz',
-  'with':    'with',
-  'the':     'thuh',
-  'a':       'ay',
-  'I':       'eye',
-  'was':     'wuz',
-  'said':    'sed',
-  'have':    'hav',
-  'he':      'hee',
-  'she':     'shee',
-  'we':      'wee',
-  'me':      'mee',
-  'be':      'bee',
-  'do':      'doo',
-  'to':      'too',
-  'go':      'goh',
-  'no':      'noh',
-  'so':      'soh',
-  'my':      'my',
-  'by':      'by',
-  'our':     'ow-er',
-  'put':     'puut',
-  'some':    'sum',
-  'come':    'kum',
-  'love':    'luv',
-  'one':     'wun',
-  'two':     'too',
-  'three':   'three',
-  'here':    'heer',
-  'there':   'thair',
-  'what':    'wuht',
-  'when':    'wen',
-  'know':    'noh',
-  'into':    'in-too',
-  'because': 'bee-cuz',
-  'friend':  'frend',
-  'about':   'uh-bout',
-  'little':  'lit-ul',
-  'pretty':  'prit-ee',
-  'funny':   'fun-ee',
-  'happy':   'hap-ee',
+  'a':    'ay',
+  'I':    'eye',
+  'read': 'reed',
 };
 
 function speakWord(word, isQuiz = false) {
@@ -1068,34 +1048,37 @@ function speakWord(word, isQuiz = false) {
   const card     = document.getElementById('flashcard');
   const speakBtn = document.getElementById('speak-btn');
 
-  // Use phonetic version if available, otherwise use original word
-  const spokenText = PHONETIC_MAP[word] || word;
-  const utter = new SpeechSynthesisUtterance(spokenText);
-  utter.rate   = 0.80;
-  utter.pitch  = 1.05;
-  utter.volume = 1;
+  // Small delay after cancel — Android Chrome drops utterances if speak() is called immediately
+  setTimeout(() => {
+    const spokenText = PHONETIC_MAP[word] || word;
+    const utter = new SpeechSynthesisUtterance(spokenText);
+    utter.rate   = 0.75;
+    utter.pitch  = 1.05;
+    utter.volume = 1;
 
-  const voices    = speechSynthesis.getVoices();
-  const preferred = voices.find(v => /en[-_](US|GB|AU)/i.test(v.lang) && !v.name.includes('Google'))
-                 || voices.find(v => /en/i.test(v.lang));
-  if (preferred) utter.voice = preferred;
+    // Use cached voices (Android loads them async via voiceschanged event)
+    const voices    = cachedVoices.length ? cachedVoices : speechSynthesis.getVoices();
+    const preferred = voices.find(v => /en[-_](US|GB|AU)/i.test(v.lang) && !v.name.includes('Google'))
+                   || voices.find(v => /en/i.test(v.lang));
+    if (preferred) utter.voice = preferred;
 
-  utter.onstart = () => {
-    if (!isQuiz && card) card.classList.add('speaking');
-    if (isQuiz && speakBtn) {
-      speakBtn.classList.add('speaking');
-      speakBtn.querySelector('.speaker-icon').textContent = '🔈';
-    }
-  };
-  utter.onend = utter.onerror = () => {
-    if (card)     card.classList.remove('speaking');
-    if (speakBtn) {
-      speakBtn.classList.remove('speaking');
-      speakBtn.querySelector('.speaker-icon').textContent = '🔊';
-    }
-  };
+    utter.onstart = () => {
+      if (!isQuiz && card) card.classList.add('speaking');
+      if (isQuiz && speakBtn) {
+        speakBtn.classList.add('speaking');
+        speakBtn.querySelector('.speaker-icon').textContent = '🔈';
+      }
+    };
+    utter.onend = utter.onerror = () => {
+      if (card)     card.classList.remove('speaking');
+      if (speakBtn) {
+        speakBtn.classList.remove('speaking');
+        speakBtn.querySelector('.speaker-icon').textContent = '🔊';
+      }
+    };
 
-  speechSynthesis.speak(utter);
+    speechSynthesis.speak(utter);
+  }, 50);
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -1130,7 +1113,8 @@ updateFlagCountBadge();
 startStudy();
 // set initial visibility
 document.getElementById('flashcard-area').style.display = 'block';
-document.getElementById('quiz-area').style.display      = 'none';
+const quizAreaInit = document.getElementById('quiz-area');
+if (quizAreaInit) quizAreaInit.style.display = 'none';
 </script>
 </body>
 </html>
