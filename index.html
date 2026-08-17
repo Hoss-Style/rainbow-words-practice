@@ -225,7 +225,10 @@
     .fc-red      { background:#ffd6d6; border-color:#d62828; } .fc-red      .fc-word { color:#7a0000; }
     .fc-sunshine { background:#fffacc; border-color:#c8a200; } .fc-sunshine .fc-word { color:#6b5200; }
 
-    .fc-color-label { font-size:1rem; font-weight:bold; opacity:0.65; margin-top:8px; }
+    .fc-color-label {
+      position:absolute; top:16px; left:50%; transform:translateX(-50%);
+      font-size:1rem; font-weight:bold; opacity:0.65; white-space:nowrap;
+    }
 
     .fc-seen-badge {
       position:absolute; top:-10px; right:-10px;
@@ -517,8 +520,8 @@
         onclick="event.stopPropagation(); toggleFlag()"
         title="Flag this word for extra practice">🚩</button>
       <div class="fc-seen-badge" id="fc-seen-badge">✓</div>
-      <div class="fc-word"        id="fc-word">—</div>
       <div class="fc-color-label" id="fc-color-label"></div>
+      <div class="fc-word"        id="fc-word">—</div>
       <div class="fc-tap-hint">👆 Tap card to hear it!</div>
     </div>
 
