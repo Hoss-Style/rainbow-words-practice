@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Rainbow Words Game</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * { box-sizing: border-box; margin: 0; padding: 0; touch-action: manipulation; }
 
     body {
       font-family: 'Comic Sans MS', 'Chalkboard SE', 'Arial Rounded MT Bold', sans-serif;
@@ -295,7 +295,7 @@
     .fc-nav-btn {
       font-family:inherit; font-size:1.5rem; font-weight:bold;
       padding:14px 32px; border:none; border-radius:24px;
-      cursor:pointer; color:white;
+      cursor:pointer; color:white; white-space:nowrap;
       box-shadow:0 5px 0 rgba(0,0,0,0.15);
       transition:transform 0.12s, box-shadow 0.12s;
       user-select:none;
@@ -438,6 +438,8 @@
       .color-checks { gap: 8px; }
       .color-check-label { font-size:0.82rem; padding:6px 10px; flex: 0 0 calc(50% - 8px); justify-content: center; }
       .mode-toggle-btn { font-size:1rem; padding:12px 16px; }
+      .fc-nav-btn { font-size:1.2rem; padding:12px 20px; }
+      .btn-next   { font-size:1.3rem; padding:14px 26px; }
     }
   </style>
 </head>
@@ -472,8 +474,11 @@
   </div>
   -->
 
+  <!-- Grade word-set tabs -->
+  <div class="mode-toggle" id="grade-tabs"></div>
+
   <!-- Color filter -->
-  <div class="color-panel">
+  <div class="color-panel" id="color-panel">
     <div class="color-panel-title">🎨 Pick which colors to practice:</div>
     <div class="color-checks" id="color-checks"></div>
     <div>
@@ -485,7 +490,7 @@
   <div class="no-words-msg" id="no-words-msg">😅 Please pick at least one color above to play!</div>
 
   <!-- Flag filter row -->
-  <div class="flag-filter-row">
+  <div class="flag-filter-row" id="flag-filter-row">
     <button class="flag-filter-btn" id="flag-filter-btn" onclick="toggleFlagFilter()">
       🚩 Flagged Words Only
       <span class="flag-count-badge" id="flag-count-badge">0</span>
@@ -569,22 +574,42 @@
 // ─────────────────────────────────────────────────────────────
 // WORD DATA
 // ─────────────────────────────────────────────────────────────
-const COLOR_DATA = [
-  { id:'purple',   label:'💜 Purple',   fcClass:'fc-purple',   themeClass:'theme-purple',   labelClass:'label-purple',   words:['a','I','like','the','at','do','to','we'] },
-  { id:'blue',     label:'💙 Blue',     fcClass:'fc-blue',     themeClass:'theme-blue',     labelClass:'label-blue',     words:['he','she','me','be','play','see','go','you','an','and','can','ran'] },
-  { id:'green',    label:'💚 Green',    fcClass:'fc-green',    themeClass:'theme-green',    labelClass:'label-green',    words:['was','his','is','in','if','it','into','for','or','eat','thank','as','has','us'] },
-  { id:'yellow',   label:'💛 Yellow',   fcClass:'fc-yellow',   themeClass:'theme-yellow',   labelClass:'label-yellow',   words:['up','but','little','big','set','get','let','are','have','about','out','know','with','all','call','my'] },
-  { id:'orange',   label:'🧡 Orange',   fcClass:'fc-orange',   themeClass:'theme-orange',   labelClass:'label-orange',   words:['by','why','kind','find','no','so','yes','love','friend','jump','one','because','help','when','what','red','blue','hot'] },
-  { id:'red',      label:'❤️ Red',      fcClass:'fc-red',      themeClass:'theme-red',      labelClass:'label-red',      words:['got','not','on','said','two','her','him','look','three','yellow','some','come','here','green','am','funny','happy','pretty','white','black','brown','down'] },
-  { id:'sunshine', label:'☀️ Sunshine', fcClass:'fc-sunshine', themeClass:'theme-sunshine', labelClass:'label-sunshine', words:['now','how','our','house','make','of','put','want','saw','this'] },
+const WORD_SETS = [
+  {
+    id: 'kindergarten',
+    label: '🌈 Kindergarten',
+    colors: [
+      { id:'purple',   label:'💜 Purple',   fcClass:'fc-purple',   themeClass:'theme-purple',   labelClass:'label-purple',   words:['a','I','like','the','at','do','to','we'] },
+      { id:'blue',     label:'💙 Blue',     fcClass:'fc-blue',     themeClass:'theme-blue',     labelClass:'label-blue',     words:['he','she','me','be','play','see','go','you','an','and','can','ran'] },
+      { id:'green',    label:'💚 Green',    fcClass:'fc-green',    themeClass:'theme-green',    labelClass:'label-green',    words:['was','his','is','in','if','it','into','for','or','eat','thank','as','has','us'] },
+      { id:'yellow',   label:'💛 Yellow',   fcClass:'fc-yellow',   themeClass:'theme-yellow',   labelClass:'label-yellow',   words:['up','but','little','big','set','get','let','are','have','about','out','know','with','all','call','my'] },
+      { id:'orange',   label:'🧡 Orange',   fcClass:'fc-orange',   themeClass:'theme-orange',   labelClass:'label-orange',   words:['by','why','kind','find','no','so','yes','love','friend','jump','one','because','help','when','what','red','blue','hot'] },
+      { id:'red',      label:'❤️ Red',      fcClass:'fc-red',      themeClass:'theme-red',      labelClass:'label-red',      words:['got','not','on','said','two','her','him','look','three','yellow','some','come','here','green','am','funny','happy','pretty','white','black','brown','down'] },
+      { id:'sunshine', label:'☀️ Sunshine', fcClass:'fc-sunshine', themeClass:'theme-sunshine', labelClass:'label-sunshine', words:['now','how','our','house','make','of','put','want','saw','this'] },
+    ],
+  },
+  {
+    id: 'grade1',
+    label: '📚 1st Grade',
+    colors: [
+      // ── Paste the 1st-grade word lists here, one line per color group. ──
+      // Copy this template (fcClass/themeClass/labelClass pick the card colors):
+      // { id:'purple', label:'💜 Purple', fcClass:'fc-purple', themeClass:'theme-purple', labelClass:'label-purple', words:['word1','word2','word3'] },
+    ],
+  },
 ];
 
-const ALL_WORDS_FLAT = [...new Set(COLOR_DATA.flatMap(c => c.words))];
+let currentSetId = localStorage.getItem('rainbowWordSet') || WORD_SETS[0].id;
+if (!WORD_SETS.some(s => s.id === currentSetId)) currentSetId = WORD_SETS[0].id;
+
+// Filled in by applyWordSet()
+let COLOR_DATA     = [];
+let ALL_WORDS_FLAT = [];
 
 // ─────────────────────────────────────────────────────────────
 // STATE
 // ─────────────────────────────────────────────────────────────
-let activeColors  = new Set(COLOR_DATA.map(c => c.id));
+let activeColors  = new Set(); // filled by applyWordSet
 let gameWords     = [];
 let currentMode   = 'flash'; // 'flash' | 'quiz'
 let flaggedOnly   = false;   // when true, only show flagged words
@@ -599,10 +624,27 @@ function saveFlags() {
 function toggleFlag() {
   const word = gameWords[fcIndex]?.word;
   if (!word) return;
-  if (flaggedWords.has(word)) flaggedWords.delete(word);
-  else                        flaggedWords.add(word);
+  const wasFlagged = flaggedWords.has(word);
+  if (wasFlagged) flaggedWords.delete(word);
+  else            flaggedWords.add(word);
   saveFlags();
-  updateFlagUI();
+
+  if (flaggedOnly && wasFlagged) {
+    // Unflagged while viewing flagged-only: drop it from the deck right away
+    gameWords = gameWords.filter(item => item.word !== word);
+    if (gameWords.length === 0) {
+      // Last flag removed — exit the filter so we don't strand an empty deck
+      flaggedOnly = false;
+      document.getElementById('flag-filter-btn').classList.remove('active');
+      updateFlagCountBadge();
+      startStudy();
+      return;
+    }
+    if (fcIndex >= gameWords.length) fcIndex = gameWords.length - 1;
+    loadFlashcard();
+  } else {
+    updateFlagUI();
+  }
   updateFlagCountBadge();
 }
 
@@ -684,7 +726,7 @@ const WRONG_MESSAGES = [
 // ─────────────────────────────────────────────────────────────
 function switchMode(mode) {
   currentMode = mode;
-  speechSynthesis.cancel();
+  cancelSpeech();
 
   // update toggle button styles (elements may not exist if commented out)
   const btnFlash = document.getElementById('btn-mode-flash');
@@ -703,12 +745,52 @@ function switchMode(mode) {
 }
 
 // ─────────────────────────────────────────────────────────────
+// GRADE / WORD-SET TABS
+// ─────────────────────────────────────────────────────────────
+function buildGradeTabs() {
+  const container = document.getElementById('grade-tabs');
+  container.innerHTML = '';
+  WORD_SETS.forEach(s => {
+    const btn = document.createElement('button');
+    btn.className = 'mode-toggle-btn ' + (s.id === currentSetId ? 'active-flash' : 'inactive');
+    btn.textContent = s.label;
+    btn.onclick = () => { if (s.id !== currentSetId) applyWordSet(s.id); };
+    container.appendChild(btn);
+  });
+}
+
+function applyWordSet(id) {
+  const set = WORD_SETS.find(s => s.id === id) || WORD_SETS[0];
+  currentSetId = set.id;
+  localStorage.setItem('rainbowWordSet', currentSetId);
+
+  COLOR_DATA     = set.colors;
+  ALL_WORDS_FLAT = [...new Set(COLOR_DATA.flatMap(c => c.words))];
+  activeColors   = new Set(COLOR_DATA.filter(c => c.words.length > 0).map(c => c.id));
+
+  // flag filter resets — its count is computed against the new set's pool
+  flaggedOnly = false;
+  document.getElementById('flag-filter-btn').classList.remove('active');
+
+  // a set with no words yet shows only the "coming soon" message
+  const hasWords = ALL_WORDS_FLAT.length > 0;
+  document.getElementById('color-panel').style.display     = hasWords ? '' : 'none';
+  document.getElementById('flag-filter-row').style.display = hasWords ? '' : 'none';
+
+  buildGradeTabs();
+  buildColorFilters();
+  updateFlagCountBadge();
+  if (currentMode === 'flash') startStudy();
+  else                         startQuiz();
+}
+
+// ─────────────────────────────────────────────────────────────
 // COLOR FILTER UI
 // ─────────────────────────────────────────────────────────────
 function buildColorFilters() {
   const container = document.getElementById('color-checks');
   container.innerHTML = '';
-  COLOR_DATA.forEach(c => {
+  COLOR_DATA.filter(c => c.words.length > 0).forEach(c => {
     const label = document.createElement('label');
     label.className = `color-check-label ${c.labelClass}`;
     label.id = `chk-label-${c.id}`;
@@ -766,17 +848,25 @@ function buildWordPool() {
 }
 
 function checkPool() {
-  const pool = buildWordPool();
-  const noMsg = document.getElementById('no-words-msg');
+  const pool   = buildWordPool();
+  const noMsg  = document.getElementById('no-words-msg');
+  const fcArea = document.getElementById('flashcard-area');
   if (pool.length === 0) {
-    noMsg.textContent = flaggedOnly
-      ? '🚩 No flagged words yet! Tap 🚩 on a card to flag it first.'
-      : '😅 Please pick at least one color above to play!';
+    const setHasWords = COLOR_DATA.some(c => c.words.length > 0);
+    noMsg.textContent = !setHasWords
+      ? '📝 This word list is coming soon — check back later!'
+      : flaggedOnly
+        ? '🚩 No flagged words yet! Tap 🚩 on a card to flag it first.'
+        : '😅 Please pick at least one color above to play!';
     noMsg.classList.add('show');
     document.getElementById('progress-dots').innerHTML = '';
+    // Empty the deck and hide the card so stale words can't be browsed/spoken/flagged
+    gameWords = [];
+    if (fcArea) fcArea.style.display = 'none';
     return null;
   }
   noMsg.classList.remove('show');
+  if (fcArea && currentMode === 'flash') fcArea.style.display = 'block';
   return pool;
 }
 
@@ -794,7 +884,7 @@ function buildDots(count, doneUpTo, phase) {
       d.className = 'dot' + (isFl ? ' flagged-dot' : '');
       d.id = 'qdot-' + i;
     }
-    if (word) d.title = word; // hover to see the word
+    if (word && phase === 'study') d.title = word; // hover to see the word (hidden in quiz — it would leak answers)
     container.appendChild(d);
   }
 }
@@ -807,7 +897,7 @@ function updateQuizDot(i, result) {
 // ══ FLASHCARD MODE ══
 // ─────────────────────────────────────────────────────────────
 function startStudy() {
-  speechSynthesis.cancel();
+  cancelSpeech();
   seenSet.clear();
   fcIndex = 0;
 
@@ -835,8 +925,8 @@ function loadFlashcard() {
 
   updateFlagUI();
 
-  document.getElementById('btn-prev').style.visibility =
-    fcIndex === 0 ? 'hidden' : 'visible';
+  document.getElementById('btn-prev').style.display =
+    fcIndex === 0 ? 'none' : '';
 
   // On last card, Next just loops back to first (no auto quiz jump)
   const btnNext = document.getElementById('btn-next');
@@ -853,7 +943,7 @@ function loadFlashcard() {
   buildDots(gameWords.length, fcIndex, 'study');
 }
 
-function speakCurrentFC() { speakWord(gameWords[fcIndex].word, false); }
+function speakCurrentFC() { if (gameWords.length) speakWord(gameWords[fcIndex].word, false); }
 function fcNext() { if (fcIndex < gameWords.length - 1) { fcIndex++; loadFlashcard(); } }
 function fcPrev() { if (fcIndex > 0) { fcIndex--; loadFlashcard(); } }
 
@@ -863,7 +953,7 @@ function fcPrev() { if (fcIndex > 0) { fcIndex--; loadFlashcard(); } }
 function startQuiz() {
   // Quiz mode is commented out — bail if elements don't exist
   if (!document.getElementById('quiz-area')) return;
-  speechSynthesis.cancel();
+  cancelSpeech();
   stars = 0; streak = 0; quizIndex = 0; locked = false;
 
   const pool = checkPool();
@@ -1011,20 +1101,24 @@ function animateConfetti() {
 // ─────────────────────────────────────────────────────────────
 // SPEECH
 // ─────────────────────────────────────────────────────────────
+// Guard everything on TTS support so the app still runs without it
+const HAS_TTS = 'speechSynthesis' in window;
+function cancelSpeech() { if (HAS_TTS) speechSynthesis.cancel(); }
+
 // Cache voices once they're loaded (Android loads them async)
 let cachedVoices = [];
 function loadVoices() {
-  cachedVoices = speechSynthesis.getVoices();
+  if (HAS_TTS) cachedVoices = speechSynthesis.getVoices();
 }
 loadVoices();
-if (speechSynthesis.onvoiceschanged !== undefined) {
+if (HAS_TTS && speechSynthesis.onvoiceschanged !== undefined) {
   speechSynthesis.onvoiceschanged = loadVoices;
 }
 
 // Unlock speech on first tap — use a real word (empty string fails on Android)
 let speechReady = false;
 function unlockSpeech() {
-  if (speechReady) return;
+  if (!HAS_TTS || speechReady) return;
   const u = new SpeechSynthesisUtterance('.');
   u.volume = 0.01; // near-silent but not zero (zero is ignored on some devices)
   u.rate = 2;      // make it fast
@@ -1041,15 +1135,18 @@ const PHONETIC_MAP = {
   'read': 'reed',
 };
 
+let speakTimer = null;
 function speakWord(word, isQuiz = false) {
-  if (!('speechSynthesis' in window) || !word) return;
-  speechSynthesis.cancel();
+  if (!HAS_TTS || !word) return;
+  cancelSpeech();
 
   const card     = document.getElementById('flashcard');
   const speakBtn = document.getElementById('speak-btn');
 
-  // Small delay after cancel — Android Chrome drops utterances if speak() is called immediately
-  setTimeout(() => {
+  // Small delay after cancel — Android Chrome drops utterances if speak() is called immediately.
+  // Clearing the pending timer keeps rapid taps from queueing duplicate utterances.
+  clearTimeout(speakTimer);
+  speakTimer = setTimeout(() => {
     const spokenText = PHONETIC_MAP[word] || word;
     const utter = new SpeechSynthesisUtterance(spokenText);
     utter.rate   = 0.75;
@@ -1094,9 +1191,14 @@ function shuffle(arr) {
 
 // Keyboard shortcuts
 document.addEventListener('keydown', e => {
+  // If a button/checkbox has focus, space belongs to it — bailing here stops
+  // the double-fire (native activation + our shortcut) and lets checkboxes toggle
+  const el = document.activeElement;
+  if (e.key === ' ' && el && (el.tagName === 'BUTTON' || el.tagName === 'INPUT')) return;
+
   if (currentMode === 'flash') {
-    if (e.key==='ArrowRight' || e.key===' ') document.getElementById('btn-next').click();
-    if (e.key==='ArrowLeft')                 document.getElementById('btn-prev').click();
+    if (e.key==='ArrowRight' || e.key===' ') { e.preventDefault(); document.getElementById('btn-next').click(); }
+    if (e.key==='ArrowLeft')                 { e.preventDefault(); document.getElementById('btn-prev').click(); }
     if (e.key==='r' || e.key==='R')          speakCurrentFC();
   } else {
     if (e.key==='1') document.querySelectorAll('.choice-btn')[0]?.click();
@@ -1108,11 +1210,8 @@ document.addEventListener('keydown', e => {
 // ─────────────────────────────────────────────────────────────
 // INIT
 // ─────────────────────────────────────────────────────────────
-buildColorFilters();
-updateFlagCountBadge();
-startStudy();
-// set initial visibility
-document.getElementById('flashcard-area').style.display = 'block';
+applyWordSet(currentSetId); // builds tabs + filters and starts study
+// flashcard-area visibility is managed by checkPool()
 const quizAreaInit = document.getElementById('quiz-area');
 if (quizAreaInit) quizAreaInit.style.display = 'none';
 </script>
