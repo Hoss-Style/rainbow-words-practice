@@ -647,6 +647,7 @@ function toggleFlag() {
     loadFlashcard();
   } else {
     updateFlagUI();
+    buildDots(gameWords.length, fcIndex, 'study'); // repaint so the flag shows on the dot immediately
   }
   updateFlagCountBadge();
 }
@@ -686,15 +687,21 @@ function toggleFlagFilter() {
 }
 
 function clearAllFlags() {
+  const wasFlaggedOnly = flaggedOnly;
   flaggedWords.clear();
   saveFlags();
-  // always drop out of flagged-only mode
   flaggedOnly = false;
   document.getElementById('flag-filter-btn').classList.remove('active');
   updateFlagCountBadge();
-  // restart the current mode so the full word pool is rebuilt
-  if (currentMode === 'flash') startStudy();
-  else                         startQuiz();
+  if (wasFlaggedOnly) {
+    // the deck was only flagged words — restart with the full pool
+    if (currentMode === 'flash') startStudy();
+    else                         startQuiz();
+  } else {
+    // deck is unchanged — keep our place, just repaint the flag button and dots
+    updateFlagUI();
+    if (gameWords.length) buildDots(gameWords.length, fcIndex, 'study');
+  }
 }
 
 // flashcard
@@ -882,7 +889,7 @@ function buildDots(count, doneUpTo, phase) {
     const isFl = word && flaggedWords.has(word);
     if (phase === 'study') {
       const state = i < doneUpTo ? ' done' : i === doneUpTo ? ' current' : '';
-      d.className = 'dot' + state + (isFl && !state.includes('done') ? ' flagged-dot' : '');
+      d.className = 'dot' + state + (isFl ? ' flagged-dot' : '');
     } else {
       d.className = 'dot' + (isFl ? ' flagged-dot' : '');
       d.id = 'qdot-' + i;
