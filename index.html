@@ -1132,6 +1132,7 @@ function unlockSpeech() {
   const u = new SpeechSynthesisUtterance('.');
   u.volume = 0.01; // near-silent but not zero (zero is ignored on some devices)
   u.rate = 2;      // make it fast
+  currentUtter = u; // hold a reference so GC can't kill it mid-speech and wedge the engine
   speechSynthesis.speak(u);
   speechReady = true;
 }
@@ -1145,27 +1146,37 @@ const PHONETIC_MAP = {
   'read': 'reed',
 };
 
-let speakTimer = null;
+let speakTimer   = null;
+let currentUtter = null; // global reference — Chrome GCs utterances mid-speech otherwise, cutting off audio
+
 function speakWord(word, isQuiz = false) {
   if (!HAS_TTS || !word) return;
-  cancelSpeech();
+
+  clearTimeout(speakTimer);
+
+  // Only cancel when something is actually playing/queued: Android Chrome
+  // silently drops an utterance spoken too soon after cancel(), so an
+  // unnecessary cancel on an idle engine is the main way words go missing.
+  const busy = speechSynthesis.speaking || speechSynthesis.pending;
+  if (busy) cancelSpeech();
 
   const card     = document.getElementById('flashcard');
   const speakBtn = document.getElementById('speak-btn');
 
-  // Small delay after cancel — Android Chrome drops utterances if speak() is called immediately.
-  // Clearing the pending timer keeps rapid taps from queueing duplicate utterances.
-  clearTimeout(speakTimer);
   speakTimer = setTimeout(() => {
     const spokenText = PHONETIC_MAP[word] || word;
     const utter = new SpeechSynthesisUtterance(spokenText);
+    currentUtter = utter;
     utter.rate   = 0.75;
     utter.pitch  = 1.05;
     utter.volume = 1;
 
-    // Use cached voices (Android loads them async via voiceschanged event)
+    // Use cached voices (Android loads them async via voiceschanged event).
+    // Prefer local voices — network voices fail silently when offline/flaky.
     const voices    = cachedVoices.length ? cachedVoices : speechSynthesis.getVoices();
-    const preferred = voices.find(v => /en[-_](US|GB|AU)/i.test(v.lang) && !v.name.includes('Google'))
+    const preferred = voices.find(v => /en[-_](US|GB|AU)/i.test(v.lang) && v.localService && !v.name.includes('Google'))
+                   || voices.find(v => /en[-_](US|GB|AU)/i.test(v.lang) && !v.name.includes('Google'))
+                   || voices.find(v => /en/i.test(v.lang) && v.localService)
                    || voices.find(v => /en/i.test(v.lang));
     if (preferred) utter.voice = preferred;
 
@@ -1177,6 +1188,7 @@ function speakWord(word, isQuiz = false) {
       }
     };
     utter.onend = utter.onerror = () => {
+      if (currentUtter === utter) currentUtter = null;
       if (card)     card.classList.remove('speaking');
       if (speakBtn) {
         speakBtn.classList.remove('speaking');
@@ -1184,8 +1196,11 @@ function speakWord(word, isQuiz = false) {
       }
     };
 
+    // Chrome can leave the engine paused after cancels/tab switches — a paused
+    // engine queues new utterances without ever playing them.
+    speechSynthesis.resume();
     speechSynthesis.speak(utter);
-  }, 50);
+  }, busy ? 150 : 0);
 }
 
 // ─────────────────────────────────────────────────────────────
