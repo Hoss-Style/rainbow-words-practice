@@ -594,10 +594,16 @@ const WORD_SETS = [
   {
     id: 'grade1',
     label: '📚 1st Grade',
+    // The school's 1st-grade list isn't color-coded, so the 100 words are split
+    // evenly into rainbow groups in sheet order — easy to regroup if needed
     colors: [
-      // ── Paste the 1st-grade word lists here, one line per color group. ──
-      // Copy this template (fcClass/themeClass/labelClass pick the card colors):
-      // { id:'purple', label:'💜 Purple', fcClass:'fc-purple', themeClass:'theme-purple', labelClass:'label-purple', words:['word1','word2','word3'] },
+      { id:'purple',   label:'💜 Purple',   fcClass:'fc-purple',   themeClass:'theme-purple',   labelClass:'label-purple',   words:['ask','had','back','your','its','pick','will','they','day','too','school','learn','well','tell','went'] },
+      { id:'blue',     label:'💙 Blue',     fcClass:'fc-blue',     themeClass:'theme-blue',     labelClass:'label-blue',     words:['then','animal','boy','girl','their','there','try','from','which','were','who','these','them','good','drink'] },
+      { id:'green',    label:'💚 Green',    fcClass:'fc-green',    themeClass:'theme-green',    labelClass:'label-green',    words:['think','water','could','would','should','give','hurt','that','once','upon','any','many','right','start'] },
+      { id:'yellow',   label:'💛 Yellow',   fcClass:'fc-yellow',   themeClass:'theme-yellow',   labelClass:'label-yellow',   words:['large','work','over','under','better','city','live','far','near','year','after','first','small','off'] },
+      { id:'orange',   label:'🧡 Orange',   fcClass:'fc-orange',   themeClass:'theme-orange',   labelClass:'label-orange',   words:['long','great','laugh','change','fall','called','always','goes','found','round','where','people','draw','again'] },
+      { id:'red',      label:'❤️ Red',      fcClass:'fc-red',      themeClass:'theme-red',      labelClass:'label-red',      words:['country','morning','away','four','move','earth','world','very','every','never','answer','before','below','even'] },
+      { id:'sunshine', label:'☀️ Sunshine', fcClass:'fc-sunshine', themeClass:'theme-sunshine', labelClass:'label-sunshine', words:['done','through','only','buy','walk','does','wash','another','other','carry','eight','mother','father','family'] },
     ],
   },
 ];
@@ -1144,6 +1150,7 @@ const PHONETIC_MAP = {
   'a':    'ay',
   'I':    'eye',
   'read': 'reed',
+  'live': 'liv', // the 1st-grade sight word is the verb (rhymes with "give"), TTS tends to say the adjective
 };
 
 let speakTimer   = null;
