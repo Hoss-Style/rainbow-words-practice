@@ -623,11 +623,30 @@ let gameWords     = [];
 let currentMode   = 'flash'; // 'flash' | 'quiz'
 let flaggedOnly   = false;   // when true, only show flagged words
 
-// Load flags from localStorage (persists across sessions)
-let flaggedWords = new Set(JSON.parse(localStorage.getItem('rainbowFlags') || '[]'));
+// Flags persist across sessions and are kept per word set, so clearing or
+// flagging on one grade tab never touches the other
+function flagStorageKey() { return 'rainbowFlags-' + currentSetId; }
+
+// One-time migration: flags used to live in a single shared list
+(function migrateLegacyFlags() {
+  const legacy = localStorage.getItem('rainbowFlags');
+  if (legacy === null) return;
+  const merged = new Set([
+    ...JSON.parse(localStorage.getItem('rainbowFlags-kindergarten') || '[]'),
+    ...JSON.parse(legacy || '[]'),
+  ]);
+  localStorage.setItem('rainbowFlags-kindergarten', JSON.stringify([...merged]));
+  localStorage.removeItem('rainbowFlags');
+})();
+
+let flaggedWords = new Set(); // loaded per set by applyWordSet
+
+function loadFlags() {
+  flaggedWords = new Set(JSON.parse(localStorage.getItem(flagStorageKey()) || '[]'));
+}
 
 function saveFlags() {
-  localStorage.setItem('rainbowFlags', JSON.stringify([...flaggedWords]));
+  localStorage.setItem(flagStorageKey(), JSON.stringify([...flaggedWords]));
 }
 
 function toggleFlag() {
@@ -783,6 +802,7 @@ function applyWordSet(id) {
   COLOR_DATA     = set.colors;
   ALL_WORDS_FLAT = [...new Set(COLOR_DATA.flatMap(c => c.words))];
   activeColors   = new Set(COLOR_DATA.filter(c => c.words.length > 0).map(c => c.id));
+  loadFlags();
 
   // flag filter resets — its count is computed against the new set's pool
   flaggedOnly = false;
