@@ -594,16 +594,14 @@ const WORD_SETS = [
   {
     id: 'grade1',
     label: '📚 1st Grade',
-    // The school's 1st-grade list isn't color-coded, so the 100 words are split
-    // evenly into rainbow groups in sheet order — easy to regroup if needed
+    // "First Grade High Frequency Words" sheet — grouped by cycle, using each
+    // cycle's color from the sheet. Note: 'your' really is in Cycles 1 AND 2.
     colors: [
-      { id:'purple',   label:'💜 Purple',   fcClass:'fc-purple',   themeClass:'theme-purple',   labelClass:'label-purple',   words:['ask','had','back','your','its','pick','will','they','day','too','school','learn','well','tell','went'] },
-      { id:'blue',     label:'💙 Blue',     fcClass:'fc-blue',     themeClass:'theme-blue',     labelClass:'label-blue',     words:['then','animal','boy','girl','their','there','try','from','which','were','who','these','them','good','drink'] },
-      { id:'green',    label:'💚 Green',    fcClass:'fc-green',    themeClass:'theme-green',    labelClass:'label-green',    words:['think','water','could','would','should','give','hurt','that','once','upon','any','many','right','start'] },
-      { id:'yellow',   label:'💛 Yellow',   fcClass:'fc-yellow',   themeClass:'theme-yellow',   labelClass:'label-yellow',   words:['large','work','over','under','better','city','live','far','near','year','after','first','small','off'] },
-      { id:'orange',   label:'🧡 Orange',   fcClass:'fc-orange',   themeClass:'theme-orange',   labelClass:'label-orange',   words:['long','great','laugh','change','fall','called','always','goes','found','round','where','people','draw','again'] },
-      { id:'red',      label:'❤️ Red',      fcClass:'fc-red',      themeClass:'theme-red',      labelClass:'label-red',      words:['country','morning','away','four','move','earth','world','very','every','never','answer','before','below','even'] },
-      { id:'sunshine', label:'☀️ Sunshine', fcClass:'fc-sunshine', themeClass:'theme-sunshine', labelClass:'label-sunshine', words:['done','through','only','buy','walk','does','wash','another','other','carry','eight','mother','father','family'] },
+      { id:'cycle1', label:'💛 Cycle 1', fcClass:'fc-yellow', themeClass:'theme-yellow', labelClass:'label-yellow', words:['little','your','with','for','have','no','one','look','my','said','are','come','here','of','out','saw','this','want','what','do'] },
+      { id:'cycle2', label:'❤️ Cycle 2', fcClass:'fc-red',    themeClass:'theme-red',    labelClass:'label-red',    words:['ask','back','had','your','its','pick','will','they','day','too','school','learn','well','tell','went','then','animal','their','boy','girl','there','try','from','which','were'] },
+      { id:'cycle3', label:'💚 Cycle 3', fcClass:'fc-green',  themeClass:'theme-green',  labelClass:'label-green',  words:['who','these','them','good','drink','think','water','could','would','should','give','hurt','that','once','upon','any','many','right','start','large','work','over','under','better','city'] },
+      { id:'cycle4', label:'💙 Cycle 4', fcClass:'fc-blue',   themeClass:'theme-blue',   labelClass:'label-blue',   words:['live','far','near','year','after','first','small','off','long','great','laugh','change','fall','called','always','goes','found','round','where','people','draw','again','country','morning','away'] },
+      { id:'cycle5', label:'🧡 Cycle 5', fcClass:'fc-orange', themeClass:'theme-orange', labelClass:'label-orange', words:['four','move','earth','world','very','every','never','answer','before','below','even','done','through','only','buy','walk','does','talk','another','other','carry','eight','mother','father','family'] },
     ],
   },
 ];
