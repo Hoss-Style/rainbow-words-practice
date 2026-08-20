@@ -104,7 +104,6 @@
       transform: scale(1.03);
     }
 
-    .mode-toggle-btn:hover { filter: brightness(1.07); }
 
     /* ── Color filter panel ──────────────────────────────── */
     .color-panel {
@@ -160,7 +159,6 @@
       color: #666; cursor: pointer; font-weight: bold;
       transition: all 0.15s; margin-top: 8px;
     }
-    .mini-btn:hover { background: #eee; }
 
     /* ── Progress dots ───────────────────────────────────── */
     .progress-dots {
@@ -205,7 +203,6 @@
       align-items: center; justify-content: center;
       min-height: 220px;
     }
-    .flashcard:hover  { transform: scale(1.025); box-shadow: 0 12px 40px rgba(0,0,0,0.18); }
     .flashcard:active { transform: scale(0.975); }
 
     .fc-word {
@@ -272,7 +269,6 @@
       z-index: 2;
       filter: grayscale(1) opacity(0.35);
     }
-    .flag-btn:hover { transform: scale(1.25); background: rgba(0,0,0,0.06); filter: none; }
     .flag-btn.flagged {
       filter: none;
       animation: flagPop 0.25s ease;
@@ -300,7 +296,6 @@
       background: #d62828; color: white; border-color: #d62828;
       box-shadow: 0 4px 0 rgba(214,40,40,0.3);
     }
-    .flag-filter-btn:hover { filter: brightness(1.06); }
     .flag-count-badge {
       background: #ff6b6b; color: white;
       font-size: 0.85rem; font-weight: bold;
@@ -324,7 +319,6 @@
       transition:transform 0.12s, box-shadow 0.12s;
       user-select:none;
     }
-    .fc-nav-btn:hover  { transform:scale(1.06) translateY(-2px); box-shadow:0 8px 0 rgba(0,0,0,0.15); }
     .fc-nav-btn:active { transform:scale(0.96) translateY(2px);  box-shadow:0 2px 0 rgba(0,0,0,0.15); }
 
     .btn-prev { background:linear-gradient(135deg,#adb5bd,#6c757d); }
@@ -352,7 +346,6 @@
       transition:background 0.4s, border-color 0.4s;
       cursor:pointer;
     }
-    .target-word-box:hover { opacity:0.9; }
 
     .target-word {
       font-size:4.5rem; font-weight:bold;
@@ -372,7 +365,6 @@
       transition:transform 0.12s, box-shadow 0.12s;
       user-select:none;
     }
-    .speak-btn:hover  { transform:scale(1.07) translateY(-2px); }
     .speak-btn:active { transform:scale(0.96) translateY(2px); }
     .speak-btn .speaker-icon { font-size:1.5rem; }
     .speak-btn.speaking {
@@ -404,7 +396,6 @@
     .choice-btn:nth-child(1) { background:linear-gradient(135deg,#f72585,#b5179e); }
     .choice-btn:nth-child(2) { background:linear-gradient(135deg,#4361ee,#3a0ca3); }
     .choice-btn:nth-child(3) { background:linear-gradient(135deg,#f77f00,#d62828); }
-    .choice-btn:hover  { transform:scale(1.05) translateY(-3px); box-shadow:0 10px 0 rgba(0,0,0,0.15); outline:none; }
     .choice-btn:active { transform:scale(0.97) translateY(2px);  box-shadow:0 3px 0 rgba(0,0,0,0.15); }
 
     /* ── Feedback overlay ────────────────────────────────── */
@@ -449,7 +440,22 @@
       box-shadow:0 5px 0 rgba(0,0,0,0.15);
       transition:transform 0.12s;
     }
-    .btn-restart-quiz:hover { transform:scale(1.06) translateY(-2px); }
+
+    /* ── Hover effects ───────────────────────────────────────
+       Only for real pointers. Touch devices leave :hover stuck after a
+       tap, which made the unflagged flag button keep its flagged look. */
+    @media (hover: hover) {
+      .mode-toggle-btn:hover  { filter: brightness(1.07); }
+      .mini-btn:hover         { background: #eee; }
+      .flashcard:hover        { transform: scale(1.025); box-shadow: 0 12px 40px rgba(0,0,0,0.18); }
+      .flag-btn:hover         { transform: scale(1.25); background: rgba(0,0,0,0.06); filter: none; }
+      .flag-filter-btn:hover  { filter: brightness(1.06); }
+      .fc-nav-btn:hover       { transform: scale(1.06) translateY(-2px); box-shadow: 0 8px 0 rgba(0,0,0,0.15); }
+      .target-word-box:hover  { opacity: 0.9; }
+      .speak-btn:hover        { transform: scale(1.07) translateY(-2px); }
+      .choice-btn:hover       { transform: scale(1.05) translateY(-3px); box-shadow: 0 10px 0 rgba(0,0,0,0.15); outline: none; }
+      .btn-restart-quiz:hover { transform: scale(1.06) translateY(-2px); }
+    }
 
     /* ── Responsive ──────────────────────────────────────── */
     @media (max-width:500px) {
