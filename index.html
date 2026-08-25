@@ -644,6 +644,22 @@ let ALL_WORDS_FLAT = [];
 // STATE
 // ─────────────────────────────────────────────────────────────
 let activeColors  = new Set(); // filled by applyWordSet
+
+// Which groups are ticked is remembered per word set, so choosing just
+// Cycle 1 on the 1st Grade tab survives a trip to the Kindergarten tab
+function colorStorageKey() { return 'rainbowColors-' + currentSetId; }
+
+function loadActiveColors() {
+  const available = COLOR_DATA.filter(c => c.words.length > 0).map(c => c.id);
+  const saved     = localStorage.getItem(colorStorageKey());
+  if (saved === null) { activeColors = new Set(available); return; } // first visit: all on
+  // drop ids that no longer exist, in case a word list gets reorganized
+  activeColors = new Set(JSON.parse(saved).filter(id => available.includes(id)));
+}
+
+function saveActiveColors() {
+  localStorage.setItem(colorStorageKey(), JSON.stringify([...activeColors]));
+}
 let gameWords     = [];
 let currentMode   = 'flash'; // 'flash' | 'quiz'
 let flaggedOnly   = false;   // when true, only show flagged words
@@ -826,7 +842,7 @@ function applyWordSet(id) {
 
   COLOR_DATA     = set.colors;
   ALL_WORDS_FLAT = [...new Set(COLOR_DATA.flatMap(c => c.words))];
-  activeColors   = new Set(COLOR_DATA.filter(c => c.words.length > 0).map(c => c.id));
+  loadActiveColors();
   loadFlags();
 
   // flag filter resets — its count is computed against the new set's pool
@@ -856,10 +872,12 @@ function buildColorFilters() {
     label.className = `color-check-label ${c.labelClass}`;
     label.id = `chk-label-${c.id}`;
     const cb = document.createElement('input');
-    cb.type = 'checkbox'; cb.checked = true; cb.id = `chk-${c.id}`;
+    cb.type = 'checkbox'; cb.checked = activeColors.has(c.id); cb.id = `chk-${c.id}`;
+    label.classList.toggle('unchecked', !cb.checked);
     cb.addEventListener('change', () => {
       if (cb.checked) activeColors.add(c.id);
       else            activeColors.delete(c.id);
+      saveActiveColors();
       label.classList.toggle('unchecked', !cb.checked);
       // restart whichever mode is active
       if (currentMode === 'flash') startStudy();
@@ -875,11 +893,12 @@ function buildColorFilters() {
 }
 
 function selectAllColors() {
-  COLOR_DATA.forEach(c => {
+  COLOR_DATA.filter(c => c.words.length > 0).forEach(c => {
     activeColors.add(c.id);
     const cb = document.getElementById(`chk-${c.id}`);
     if (cb) { cb.checked = true; document.getElementById(`chk-label-${c.id}`).classList.remove('unchecked'); }
   });
+  saveActiveColors();
   if (currentMode === 'flash') startStudy(); else startQuiz();
 }
 function clearAllColors() {
@@ -888,6 +907,7 @@ function clearAllColors() {
     const cb = document.getElementById(`chk-${c.id}`);
     if (cb) { cb.checked = false; document.getElementById(`chk-label-${c.id}`).classList.add('unchecked'); }
   });
+  saveActiveColors();
   if (currentMode === 'flash') startStudy(); else startQuiz();
 }
 
