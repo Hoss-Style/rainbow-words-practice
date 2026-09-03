@@ -1184,7 +1184,11 @@ function animateConfetti() {
 // ─────────────────────────────────────────────────────────────
 // Guard everything on TTS support so the app still runs without it
 const HAS_TTS = 'speechSynthesis' in window;
-function cancelSpeech() { if (HAS_TTS) speechSynthesis.cancel(); }
+function cancelSpeech() {
+  if (HAS_TTS) speechSynthesis.cancel();
+  if (currentAudio) { currentAudio.pause(); currentAudio.currentTime = 0; currentAudio = null; }
+  setSpeakingUI(false, false);
+}
 
 // Cache voices once they're loaded (Android loads them async)
 let cachedVoices = [];
@@ -1220,8 +1224,52 @@ const PHONETIC_MAP = {
 
 let speakTimer   = null;
 let currentUtter = null; // global reference — Chrome GCs utterances mid-speech otherwise, cutting off audio
+let currentAudio = null;
+
+// Words with a real recording in audio/. Everything else falls back to TTS,
+// so cycles can be added a few at a time without breaking anything.
+const RECORDED_WORDS = new Set([
+  'little','your','with','for','have','no','one','look','my','said',
+  'are','come','here','of','out','saw','this','want','what','do',
+]);
+
+const audioCache = {};
+
+function setSpeakingUI(on, isQuiz) {
+  const card     = document.getElementById('flashcard');
+  const speakBtn = document.getElementById('speak-btn');
+  if (card) card.classList.toggle('speaking', on && !isQuiz);
+  if (speakBtn) {
+    speakBtn.classList.toggle('speaking', on && isQuiz);
+    speakBtn.querySelector('.speaker-icon').textContent = (on && isQuiz) ? '\u{1F508}' : '\u{1F50A}';
+  }
+}
+
+function playRecording(word, isQuiz) {
+  const key = word.toLowerCase();
+  let a = audioCache[key];
+  if (!a) { a = new Audio('audio/' + encodeURIComponent(key) + '.m4a'); a.preload = 'auto'; audioCache[key] = a; }
+  currentAudio = a;
+
+  const done = () => { if (currentAudio === a) currentAudio = null; setSpeakingUI(false, isQuiz); };
+  a.onplay  = () => setSpeakingUI(true, isQuiz);
+  a.onended = done;
+  a.onerror = () => { done(); speakWithTTS(word, isQuiz); }; // missing/broken file -> TTS
+
+  try { a.currentTime = 0; } catch (e) {}
+  const p = a.play();
+  if (p && p.catch) p.catch(() => { done(); speakWithTTS(word, isQuiz); });
+}
 
 function speakWord(word, isQuiz = false) {
+  if (!word) return;
+  clearTimeout(speakTimer);
+  cancelSpeech();
+  if (RECORDED_WORDS.has(word.toLowerCase())) playRecording(word, isQuiz);
+  else                                        speakWithTTS(word, isQuiz);
+}
+
+function speakWithTTS(word, isQuiz = false) {
   if (!HAS_TTS || !word) return;
 
   clearTimeout(speakTimer);
