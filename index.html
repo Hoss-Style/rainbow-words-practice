@@ -604,6 +604,13 @@
 // ─────────────────────────────────────────────────────────────
 // WORD DATA
 // ─────────────────────────────────────────────────────────────
+
+// ── Weekly spelling list ────────────────────────────────────
+// Update these two lines every week when new words come home —
+// nothing else in the file needs to change.
+const SPELLING_WEEK  = 3;
+const SPELLING_WORDS = ['day', 'too', 'school', 'learn'];
+
 const WORD_SETS = [
   {
     id: 'kindergarten',
@@ -616,6 +623,13 @@ const WORD_SETS = [
       { id:'orange',   label:'🧡 Orange',   fcClass:'fc-orange',   themeClass:'theme-orange',   labelClass:'label-orange',   words:['by','why','kind','find','no','so','yes','love','friend','jump','one','because','help','when','what','red','blue','hot'] },
       { id:'red',      label:'❤️ Red',      fcClass:'fc-red',      themeClass:'theme-red',      labelClass:'label-red',      words:['got','not','on','said','two','her','him','look','three','yellow','some','come','here','green','am','funny','happy','pretty','white','black','brown','down'] },
       { id:'sunshine', label:'☀️ Sunshine', fcClass:'fc-sunshine', themeClass:'theme-sunshine', labelClass:'label-sunshine', words:['now','how','our','house','make','of','put','want','saw','this'] },
+    ],
+  },
+  {
+    id: 'spelling',
+    label: '✏️ Spelling',
+    colors: [
+      { id:'thisweek', label:`📝 Week ${SPELLING_WEEK}`, fcClass:'fc-purple', themeClass:'theme-purple', labelClass:'label-purple', words: SPELLING_WORDS },
     ],
   },
   {
