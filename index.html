@@ -606,11 +606,25 @@
 // WORD DATA
 // ─────────────────────────────────────────────────────────────
 
-// ── Weekly spelling list ────────────────────────────────────
-// Update these two lines every week when new words come home —
-// nothing else in the file needs to change.
-const SPELLING_WEEK  = 4;
-const SPELLING_WORDS = ['tell', 'well', 'went', 'then'];
+// ── Weekly spelling lists ───────────────────────────────────
+// Each week's test words come home as a new list: add one line at the
+// bottom, newest last. The newest week is the one selected by default.
+const SPELLING_WEEKS = [
+  { week: 1, words: ['ask', 'back', 'had', 'your'] },
+  { week: 2, words: ['its', 'pick', 'will', 'they'] },
+  { week: 3, words: ['day', 'too', 'school', 'learn'] },
+  { week: 4, words: ['tell', 'well', 'went', 'then'] },
+];
+// Weeks cycle through the rainbow so each chip and card color is distinct
+const SPELLING_COLORS = [
+  { fcClass:'fc-purple',   themeClass:'theme-purple',   labelClass:'label-purple' },
+  { fcClass:'fc-blue',     themeClass:'theme-blue',     labelClass:'label-blue' },
+  { fcClass:'fc-green',    themeClass:'theme-green',    labelClass:'label-green' },
+  { fcClass:'fc-yellow',   themeClass:'theme-yellow',   labelClass:'label-yellow' },
+  { fcClass:'fc-orange',   themeClass:'theme-orange',   labelClass:'label-orange' },
+  { fcClass:'fc-red',      themeClass:'theme-red',      labelClass:'label-red' },
+  { fcClass:'fc-sunshine', themeClass:'theme-sunshine', labelClass:'label-sunshine' },
+];
 
 const WORD_SETS = [
   {
@@ -642,9 +656,11 @@ const WORD_SETS = [
   {
     id: 'spelling',
     label: '✏️ Spelling',
-    colors: [
-      { id:'thisweek', label:`📝 Week ${SPELLING_WEEK}`, fcClass:'fc-purple', themeClass:'theme-purple', labelClass:'label-purple', words: SPELLING_WORDS },
-    ],
+    colors: SPELLING_WEEKS.map((w, i) => ({
+      id: `week${w.week}`, label: `📝 Week ${w.week}`, words: w.words,
+      ...SPELLING_COLORS[i % SPELLING_COLORS.length],
+    })),
+    defaultColors: [`week${SPELLING_WEEKS[SPELLING_WEEKS.length - 1].week}`],
   },
 ];
 
@@ -666,10 +682,14 @@ function colorStorageKey() { return 'rainbowColors-' + currentSetId; }
 
 function loadActiveColors() {
   const available = COLOR_DATA.filter(c => c.words.length > 0).map(c => c.id);
+  const set       = WORD_SETS.find(s => s.id === currentSetId);
+  const fallback  = (set.defaultColors || available).filter(id => available.includes(id));
   const saved     = localStorage.getItem(colorStorageKey());
-  if (saved === null) { activeColors = new Set(available); return; } // first visit: all on
-  // drop ids that no longer exist, in case a word list gets reorganized
-  activeColors = new Set(JSON.parse(saved).filter(id => available.includes(id)));
+  if (saved === null) { activeColors = new Set(fallback); return; } // first visit
+  const savedIds = JSON.parse(saved);
+  const valid    = savedIds.filter(id => available.includes(id));
+  // ids that no longer exist (a reorganized list) fall back to the default
+  activeColors = new Set(savedIds.length > 0 && valid.length === 0 ? fallback : valid);
 }
 
 function saveActiveColors() {
